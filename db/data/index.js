@@ -7,5 +7,5 @@ const data = {
   test: testData,
 };
 
-console.log(JSON.stringify(data[ENV].articleData, null, 2));
+// console.log(JSON.stringify(data[ENV].articleData, null, 2));
 module.exports = data[ENV];
