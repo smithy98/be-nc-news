@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-const { getAllTopics } = require("./controllers/topic");
+const { apiRouter } = require("./routers/api-router");
 
-app.use("/api", getAllTopics);
+app.use("/api", apiRouter);
 
 module.exports = app;

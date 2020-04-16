@@ -38,11 +38,6 @@ const articleSeedData = [
   },
 ];
 
-// beforeEach(() => {
-//   return connection.seed.run();
-// });
-// after(() => connection.destroy());
-
 describe("formatDates", () => {
   const actual = formatDates(testData.articleData);
   it("returns an array of article objects", () => {
