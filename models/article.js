@@ -20,15 +20,7 @@ exports.modifyArticleById = (article_id, inc_votes) => {
     .then(([response]) => {
       const { votes } = response;
       const newVotes = votes + inc_votes;
-      console.log(
-        "article id ->",
-        article_id,
-        votes,
-        "+",
-        inc_votes,
-        "=",
-        newVotes
-      );
+
       return connection("articles")
         .where("article_id", article_id)
         .update("votes", newVotes)
