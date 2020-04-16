@@ -28,6 +28,7 @@ describe("/api", () => {
         });
     });
   });
+
   describe("/users", () => {
     it("GET: 200 - returns a comment object with correct keys", () => {
       return request(app)
@@ -36,6 +37,35 @@ describe("/api", () => {
         .then(({ body }) => {
           expect(body).to.not.be.an("array");
           expect(Object.keys(body)).to.eql(["username", "avatar_url", "name"]);
+        });
+    });
+  });
+
+  describe("/articles", () => {
+    it("Get: 200 - returns an article object", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).to.have.all.keys([
+            "author",
+            "title",
+            "article_id",
+            "body",
+            "topic",
+            "created_at",
+            "votes",
+            "comment_count",
+          ]);
+        });
+    });
+    it.only("Patch: 200 - modifies the data base and returns object", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article.votes).to.equal(1);
         });
     });
   });
