@@ -1,4 +1,17 @@
-const { addComment, fetchCommentsById } = require("../models/comment");
+const {
+  fetchCommentsById,
+  addComment,
+  modifyComment,
+} = require("../models/comment");
+
+exports.getComments = (req, res, next) => {
+  const { params, query } = req;
+  fetchCommentsById(params, query)
+    .then((comments) => {
+      res.status(200).send({ comments });
+    })
+    .catch(next);
+};
 
 exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
@@ -13,11 +26,11 @@ exports.postComment = (req, res, next) => {
     .catch(next);
 };
 
-exports.getComments = (req, res, next) => {
-  const { params, query } = req;
-  fetchCommentsById(params, query)
-    .then((comments) => {
-      res.status(200).send({ comments });
+exports.patchComment = (req, res, next) => {
+  const { body, params } = req;
+  modifyComment(body, params)
+    .then((comment) => {
+      res.status(200).send({ comment });
     })
     .catch(next);
 };

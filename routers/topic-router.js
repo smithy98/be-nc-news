@@ -4,6 +4,4 @@ const { handle405s } = require("../errors");
 
 topicRouter.route("/").get(getAllTopics).all(handle405s);
 
-module.exports = {
-  topicRouter,
-};
+module.exports = topicRouter;

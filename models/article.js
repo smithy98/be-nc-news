@@ -4,6 +4,7 @@ exports.fetchAllArticles = ({
   sort_by = "articles.created_at",
   order_by = "asc",
   author,
+  topic,
 }) => {
   return connection("articles")
     .select("articles.*")
@@ -11,9 +12,10 @@ exports.fetchAllArticles = ({
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
     .orderBy(sort_by, order_by)
+
     .modify((articleQuery) => {
-      const ww = `articles.${author}`;
       if (author) articleQuery.where(`articles.author`, author);
+      if (topic) articleQuery.where("articles.topic", topic);
     })
     .then((articles) => {
       return articles;
@@ -36,8 +38,8 @@ exports.modifyArticleById = (article_id, inc_votes) => {
   return connection("articles")
     .select("votes")
     .where("article_id", article_id)
-    .then(([response]) => {
-      const { votes } = response;
+    .then(([article]) => {
+      const { votes } = article;
       const newVotes = votes + inc_votes;
 
       return connection("articles")

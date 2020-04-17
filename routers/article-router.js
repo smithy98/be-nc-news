@@ -21,6 +21,4 @@ articleRouter
   .post(postComment)
   .all(handle405s);
 
-module.exports = {
-  articleRouter,
-};
+module.exports = articleRouter;

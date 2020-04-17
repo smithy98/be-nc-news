@@ -21,3 +21,21 @@ exports.fetchCommentsById = (
       return comments;
     });
 };
+
+exports.modifyComment = ({ inc_votes }, { comment_id }) => {
+  return connection("comments")
+    .select("votes")
+    .where("comment_id", comment_id)
+    .then(([comment]) => {
+      const { votes } = comment;
+      const newVotes = votes + inc_votes;
+
+      return connection("comments")
+        .where("comment_id", comment_id)
+        .update("votes", newVotes)
+        .returning("*");
+    })
+    .then(([article]) => {
+      return article;
+    });
+};

@@ -76,7 +76,7 @@ describe("app endpoints", () => {
       return Promise.all(requests);
     });
   });
-  describe.only("/api/articles", () => {
+  describe("/api/articles", () => {
     it("Get: 200 - returns object with an array of article objects", () => {
       return request(app)
         .get("/api/articles")
@@ -111,6 +111,17 @@ describe("app endpoints", () => {
         .expect(200)
         .then(({ body }) => {
           expect(body.articles).to.be.descendingBy("article_id");
+        });
+    });
+    it("GET: 200 - returns with filtered array from topic query", () => {
+      return request(app)
+        .get("/api/articles?topic=cooking")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          articles.forEach((article) => {
+            expect(article.topic).to.equal("cooking");
+          });
         });
     });
     it("GET: 200 - returns with filtered array from author query", () => {
@@ -239,6 +250,25 @@ describe("app endpoints", () => {
           });
       });
       return Promise.all(requests);
+    });
+  });
+  describe.only("/api/comments/:comment_id", () => {
+    it("PATCH: 200 - returns the comment object", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({
+          inc_votes: 4,
+        })
+        .expect(200)
+        .then(({ body: { comment } }) => {
+          expect(comment.votes).to.equal(3);
+        });
+    });
+    it("DELETE: 204 - returns a 204 status code", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204)
+        .then(() => {});
     });
   });
 });
