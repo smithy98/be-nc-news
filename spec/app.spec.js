@@ -268,7 +268,22 @@ describe("app endpoints", () => {
       return request(app)
         .delete("/api/comments/1")
         .expect(204)
-        .then(() => {});
+        .then((response) => {
+          expect(response.body).to.eql({});
+        });
+    });
+    it("Delete: 204 - checks the comment has been deleted", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204)
+        .then((response) => {
+          return connection("comments")
+            .select("comment_id")
+            .where("comment_id", 1)
+            .then((comment) => {
+              expect(comment).to.eql([]);
+            });
+        });
     });
   });
 });
