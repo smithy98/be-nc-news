@@ -97,12 +97,31 @@ describe("app endpoints", () => {
           ]);
         });
     });
-    it("Get: 200 -  returns with correct default sorted_by (date)", () => {
+    it("Get: 200 -  returns with correct default sort_by (date)", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          expect(body.articles).to.be.sortedBy("created_at", "asc");
+          expect(body.articles).to.be.sortedBy("created_at");
+        });
+    });
+    it("GET: 200 - returns with correct sort_by and order_by params", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&order_by=desc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.descendingBy("article_id");
+        });
+    });
+    it("GET: 200 - returns with filtered array from author query", () => {
+      return request(app)
+        .get("/api/articles?author=jessjelly")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          articles.forEach((article) => {
+            expect(article.author).to.equal("jessjelly");
+          });
         });
     });
   });

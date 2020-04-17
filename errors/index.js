@@ -6,6 +6,7 @@ exports.handlePSQLError = (err, req, res, next) => {
   const errCodes = {
     42703: { status: 400, msg: "Column Not Found" },
   };
+  console.log(err);
 
   if (err.code in errCodes) {
     const { status, msg } = errCodes[err.code];
