@@ -1,22 +1,25 @@
-const { expect } = require("chai");
+const chai = require("chai");
+const expect = chai.expect;
 const request = require("supertest");
 const app = require("../app");
 const connection = require("../db/connection");
+
+chai.use(require("chai-sorted"));
 
 beforeEach(() => {
   return connection.seed.run();
 });
 after(() => connection.destroy());
 
-describe("/api", () => {
-  describe("/topics", () => {
+describe("app endpoints", () => {
+  describe("/api/topics", () => {
     it("Get: 200 - fetches all topics", () => {
       return request(app)
         .get("/api/topics")
         .expect(200)
         .then(({ body }) => {
           expect(body).to.eql({
-            topic: [
+            topics: [
               { slug: "coding", description: "Code is love, code is life" },
               { slug: "football", description: "FOOTIE!" },
               {
@@ -27,39 +30,102 @@ describe("/api", () => {
           });
         });
     });
-  });
+    it("INVALID: 405 - returns with Method not allowed", () => {
+      const invalidMethods = ["put", "delete", "patch", "post"];
 
-  describe("/users", () => {
-    it("GET: 200 - returns a comment object with correct keys", () => {
+      const requests = invalidMethods.map((method) => {
+        return request(app)
+          [method]("/api/topics")
+          .expect(405)
+          .then((res) => {
+            expect(res.body.msg).to.eql("Method Not Allowed");
+          });
+      });
+      return Promise.all(requests);
+    });
+  });
+  describe("/api/users/:username", () => {
+    it("GET: /api/users/:username - 200 - returns a comment object with correct keys", () => {
       return request(app)
         .get("/api/users/grumpy19")
         .expect(200)
         .then(({ body }) => {
-          expect(body).to.not.be.an("array");
-          expect(Object.keys(body)).to.eql(["username", "avatar_url", "name"]);
+          expect(body).to.have.keys(["user"]);
+          expect(body.user).to.have.keys(["username", "avatar_url", "name"]);
+          expect(body).to.be.eql({
+            user: {
+              username: "grumpy19",
+              avatar_url:
+                "https://www.tumbit.com/profile-image/4/original/mr-grumpy.jpg",
+              name: "Paul Grump",
+            },
+          });
         });
     });
-  });
+    it("INVALID: 405 - returns with Method not allowed", () => {
+      const invalidMethods = ["put", "delete", "post", "patch"];
 
-  describe("/articles", () => {
-    it("Get: 200 - returns an article object", () => {
+      const requests = invalidMethods.map((method) => {
+        return request(app)
+          [method]("/api/users/grumpy19")
+          .expect(405)
+          .then((res) => {
+            expect(res.body.msg).to.eql("Method Not Allowed");
+          });
+      });
+      return Promise.all(requests);
+    });
+  });
+  describe.only("/api/articles", () => {
+    it("Get: 200 - returns object with an array of article objects", () => {
       return request(app)
-        .get("/api/articles/1")
+        .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          expect(body).to.have.all.keys([
-            "author",
-            "title",
+          const { articles } = body;
+          expect(articles).to.be.an("array");
+
+          expect(articles[0]).to.have.all.keys([
             "article_id",
+            "author",
             "body",
-            "topic",
             "created_at",
+            "title",
+            "topic",
             "votes",
             "comment_count",
           ]);
         });
     });
-    it.only("Patch: 200 - modifies the data base and returns object", () => {
+    it("Get: 200 -  returns with correct default sorted_by (date)", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.sortedBy("created_at", "asc");
+        });
+    });
+  });
+  describe("/api/articles/:article_id", () => {
+    it("Get: 200 - returns an article object", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).to.eql({
+            article_id: 1,
+            title: "Running a Node App",
+            body:
+              "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+            votes: 0,
+            topic: "coding",
+            author: "jessjelly",
+            created_at: "2016-08-18T12:07:52.389Z",
+            comment_count: "8",
+          });
+        });
+    });
+    it("Patch: 200 - modifies the data base and returns object", () => {
       return request(app)
         .patch("/api/articles/1")
         .send({ inc_votes: 1 })
@@ -67,6 +133,93 @@ describe("/api", () => {
         .then(({ body }) => {
           expect(body.article.votes).to.equal(1);
         });
+    });
+    it("INVALID: 405 - returns with Method not allowed", () => {
+      const invalidMethods = ["put", "delete", "post"];
+
+      const requests = invalidMethods.map((method) => {
+        return request(app)
+          [method]("/api/articles/1")
+          .expect(405)
+          .then(({ body }) => {
+            expect(body.msg).to.eql("Method Not Allowed");
+          });
+      });
+      return Promise.all(requests);
+    });
+  });
+  describe("/api/articles/:article_id/comments", () => {
+    it("Post: 201 - add a comment to a article id", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "tickle122",
+          body: "its good",
+        })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.comment.article_id).to.equal(1);
+          expect(body.comment.author).to.equal("tickle122");
+          expect(body.comment.body).to.equal("its good");
+          expect(body.comment.comment_id).to.equal(301);
+        });
+    });
+    it("Get: 200 - returns an array of comment objects", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          for (let comment of comments) {
+            expect(comment).to.be.an("object");
+            expect(comment.article_id).to.equal(1);
+          }
+        });
+    });
+    it("Get: 200 - returns an array of comment objects sorted by default(created_at)", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          let newDateBody = [];
+          for (let i = 0; i < body.length; i++) {
+            const { ...keys } = body[i];
+            newDateBody.push({
+              ...keys,
+              created_at: Date.parse(body[i].created_at),
+            });
+          }
+          expect(newDateBody).to.be.sortedBy("created_at", "asc");
+        });
+    });
+    it("Get: 200 - returns an array of comment objects sorted by comment_id", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=comment_id")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).to.be.sortedBy("comment_id", "asc");
+        });
+    });
+    it("Get: 200 - returns an array of comment objects sorted by comment_id in descending order ", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=comment_id&order_by")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).to.be.sortedBy("comment_id", "asc");
+        });
+    });
+    it("INVALID: 405 - returns with Method not allowed", () => {
+      const invalidMethods = ["put", "delete", "patch"];
+
+      const requests = invalidMethods.map((method) => {
+        return request(app)
+          [method]("/api/articles/1/comments")
+          .expect(405)
+          .then((res) => {
+            expect(res.body.msg).to.eql("Method Not Allowed");
+          });
+      });
+      return Promise.all(requests);
     });
   });
 });

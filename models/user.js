@@ -5,8 +5,8 @@ const fetchUserById = (username) => {
     .select("*")
     .where("username", username)
     .from("users")
-    .then(([object]) => {
-      return object;
+    .then(([user]) => {
+      return user;
     });
 };
 

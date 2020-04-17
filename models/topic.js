@@ -4,8 +4,8 @@ const fetchAllTopics = () => {
   return connection
     .select("*")
     .from("topics")
-    .then((topic) => {
-      return topic;
+    .then((topics) => {
+      return topics;
     });
 };
 

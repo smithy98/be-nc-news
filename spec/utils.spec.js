@@ -45,9 +45,8 @@ describe("formatDates", () => {
       expect(article).to.be.an("object");
     }
   });
-  it("returns array of acrticle objs with a dates key", () => {
+  it("returns array of article objs with a dates key", () => {
     for (let element of actual) {
-      // console.log(element.created_at);
       expect(element.created_at).to.be.instanceof(Date);
     }
   });
@@ -57,7 +56,6 @@ describe("makeRefObj", () => {
   // const formattedTestData = formatDates(testData.articleData);
   const newRefObj = makeRefObj(articleSeedData);
   const refObjLength = articleSeedData.length;
-  // console.log(refObjLength);
 
   it("returns an object", () => {
     expect(newRefObj).to.be.an("object");
@@ -72,7 +70,7 @@ describe("makeRefObj", () => {
   });
 });
 
-describe.only("formatComments", () => {
+describe("formatComments", () => {
   it("returns an empty array when passed an empty array", () => {
     const commentFormatter = formatComments([]);
     expect(commentFormatter).to.eql([]);

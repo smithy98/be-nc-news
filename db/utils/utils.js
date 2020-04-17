@@ -1,25 +1,24 @@
 exports.formatDates = (list) => {
   return list.map(({ created_at, ...keys }) => {
-    const newList = {
+    const newElement = {
       ...keys,
       created_at: new Date(created_at),
     };
-    return newList;
+    return newElement;
   });
 };
 
 exports.makeRefObj = (list) => {
-  let newList = {};
+  let refObj = {};
   for (let i = 0; i < list.length; i++) {
     const article_id = list[i].article_id;
     const name = list[i].title;
-    newList[name] = article_id;
+    refObj[name] = article_id;
   }
-  return newList;
+  return refObj;
 };
 
 exports.formatComments = (comments, articleRef) => {
-  // console.log("----->", comments);
   return comments.map(({ created_by, belongs_to, created_at, ...keys }) => {
     return {
       author: created_by,

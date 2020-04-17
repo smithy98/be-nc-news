@@ -1,13 +1,23 @@
-const { fetchArticleById, modifyArticleById } = require("../models/article");
+const {
+  fetchAllArticles,
+  fetchArticleById,
+  modifyArticleById,
+} = require("../models/article");
+
+exports.getAllArticles = (req, res, next) => {
+  fetchAllArticles()
+    .then((articles) => {
+      res.status(200).send({ articles });
+    })
+    .catch(next);
+};
 
 exports.getArticleById = (req, res, next) => {
   fetchArticleById(req.params)
-    .then(([response]) => {
-      res.status(200).send(response);
+    .then((article) => {
+      res.status(200).send({ article });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 exports.patchArticleById = (req, res, next) => {
@@ -15,7 +25,9 @@ exports.patchArticleById = (req, res, next) => {
     params: { article_id },
     body: { inc_votes },
   } = req;
-  modifyArticleById(article_id, inc_votes).then((article) => {
-    res.status(200).send({ article });
-  });
+  modifyArticleById(article_id, inc_votes)
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch(next);
 };

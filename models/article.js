@@ -1,5 +1,17 @@
 const connection = require("../db/connection");
 
+exports.fetchAllArticles = () => {
+  return connection("articles")
+    .select("articles.*")
+    .count("comments.article_id as comment_count")
+    .leftJoin("comments", "articles.article_id", "comments.article_id")
+    .groupBy("articles.article_id")
+    .orderBy("articles.created_at", "asc")
+    .then((articles) => {
+      return articles;
+    });
+};
+
 exports.fetchArticleById = ({ article_id }) => {
   return connection("articles")
     .select("articles.*")
@@ -7,9 +19,8 @@ exports.fetchArticleById = ({ article_id }) => {
     .leftJoin("comments", "articles.article_id", "comments.article_id")
     .groupBy("articles.article_id")
     .where("articles.article_id", article_id)
-    .then((response) => {
-      console.log(response);
-      return response;
+    .then(([article]) => {
+      return article;
     });
 };
 
@@ -26,7 +37,7 @@ exports.modifyArticleById = (article_id, inc_votes) => {
         .update("votes", newVotes)
         .returning("*");
     })
-    .then(([response]) => {
-      return response;
+    .then(([article]) => {
+      return article;
     });
 };
