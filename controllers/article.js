@@ -7,7 +7,8 @@ const {
 exports.getAllArticles = (req, res, next) => {
   fetchAllArticles(req.query)
     .then((articles) => {
-      res.status(200).send({ articles });
+      if (articles[0]) res.status(200).send({ articles });
+      else next(res);
     })
     .catch(next);
 };

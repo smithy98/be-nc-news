@@ -16,11 +16,12 @@ exports.getComments = (req, res, next) => {
 
 exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
-  const commentObj = req.body;
-  commentObj.article_id = parseInt(article_id);
-  commentObj.author = commentObj.username;
-  delete commentObj.username;
-  addComment(commentObj)
+  const newBody = req.body;
+  newBody.article_id = parseInt(article_id);
+  newBody.author = newBody.username;
+  delete newBody.username;
+
+  addComment(newBody)
     .then((comment) => {
       res.status(201).send({ comment });
     })

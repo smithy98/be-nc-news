@@ -23,5 +23,57 @@
         }
       ]
     }
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user object with :username",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "tickle122",
+          "avatar_url": "https://www.spiritsurfers.net/monastery/wp-content/uploads/_41500270_mrtickle.jpg",
+          "name": "Tom Tickle"
+        }
+      ]
+    }
+  },
+  "Get /api/article/:article_id": {
+    "description": "Serves an article from article_id",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "title": "Running a Node App",
+        "topic": "coding",
+        "author": "jessjelly",
+        "body": "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+        "created_at": 1471522072389
+      }
+    }
+  },
+  "PATCH /api/article/:article_id": {
+    "description": "Edits an article with the article_id",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "title": "Running a Node App",
+        "topic": "coding",
+        "author": "jessjelly",
+        "body": "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+        "created_at": 1471522072389
+      }
+    }
+  },
+  "GET /api/:article_id/comments": {
+    "description": "Serves an array of comment objects with the article_id",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "title": "Running a Node App",
+        "topic": "coding",
+        "author": "jessjelly",
+        "body": "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
+        "created_at": 1471522072389
+      }
+    }
   }
 }

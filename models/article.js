@@ -5,6 +5,7 @@ exports.fetchAllArticles = ({
   order_by = "asc",
   author,
   topic,
+  ...keys
 }) => {
   return connection("articles")
     .select("articles.*")
@@ -14,11 +15,12 @@ exports.fetchAllArticles = ({
     .orderBy(sort_by, order_by)
 
     .modify((articleQuery) => {
-      if (author) articleQuery.where(`articles.author`, author);
+      if (author) articleQuery.where("articles.author", author);
       if (topic) articleQuery.where("articles.topic", topic);
     })
     .then((articles) => {
-      return articles;
+      const invalidQueries = { ...keys };
+      if (Object.keys(invalidQueries).length === 0) return articles;
     });
 };
 

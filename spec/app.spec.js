@@ -45,7 +45,7 @@ describe("app endpoints", () => {
     });
   });
   describe("/api/users/:username", () => {
-    it("GET: /api/users/:username - 200 - returns a comment object with correct keys", () => {
+    it("GET: 200 - returns a comment object with correct keys", () => {
       return request(app)
         .get("/api/users/grumpy19")
         .expect(200)
@@ -62,6 +62,14 @@ describe("app endpoints", () => {
           });
         });
     });
+    it("GET: 400 - returns with Invalid Request when invalid ", () => {
+      return request(app)
+        .get("/api/users/billyroj")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid Request");
+        });
+    });
     it("INVALID: 405 - returns with Method not allowed", () => {
       const invalidMethods = ["put", "delete", "post", "patch"];
 
@@ -69,8 +77,8 @@ describe("app endpoints", () => {
         return request(app)
           [method]("/api/users/grumpy19")
           .expect(405)
-          .then((res) => {
-            expect(res.body.msg).to.eql("Method Not Allowed");
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Method Not Allowed");
           });
       });
       return Promise.all(requests);
@@ -124,6 +132,14 @@ describe("app endpoints", () => {
           });
         });
     });
+    it("GET: 400 - returns with Invalid Request when topic query invalid", () => {
+      return request(app)
+        .get("/api/articles?topic=darts")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.be.equal("Invalid Request");
+        });
+    });
     it("GET: 200 - returns with filtered array from author query", () => {
       return request(app)
         .get("/api/articles?author=jessjelly")
@@ -133,6 +149,22 @@ describe("app endpoints", () => {
           articles.forEach((article) => {
             expect(article.author).to.equal("jessjelly");
           });
+        });
+    });
+    it("GET: 400 - returns with Invalid Request when author query invalid", () => {
+      return request(app)
+        .get("/api/articles?author=jkrowling")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.be.equal("Invalid Request");
+        });
+    });
+    it("GET: 400 - returns with Invalid Request when an invalid query is passed", () => {
+      return request(app)
+        .get("/api/articles?glass=darts")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.be.equal("Invalid Request");
         });
     });
   });
@@ -252,7 +284,7 @@ describe("app endpoints", () => {
       return Promise.all(requests);
     });
   });
-  describe.only("/api/comments/:comment_id", () => {
+  describe("/api/comments/:comment_id", () => {
     it("PATCH: 200 - returns the comment object", () => {
       return request(app)
         .patch("/api/comments/1")
@@ -284,6 +316,27 @@ describe("app endpoints", () => {
               expect(comment).to.eql([]);
             });
         });
+    });
+  });
+  describe("/api", () => {
+    it("Get: 200 - returns an object of endpoints", () => {
+      return (
+        request(app)
+          .get("/api")
+          // .expect(200)
+          .then((response) => {
+            const x = JSON.parse(response.text);
+            expect(Object.keys(x)).to.eql([
+              "GET /api",
+              "GET /api/topics",
+              "GET /api/articles",
+              "GET /api/users/:username",
+              "Get /api/article/:article_id",
+              "PATCH /api/article/:article_id",
+              "GET /api/:article_id/comments",
+            ]);
+          })
+      );
     });
   });
 });

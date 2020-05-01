@@ -1,8 +1,8 @@
 const connection = require("../db/connection");
 
-exports.addComment = (commentObj) => {
+exports.addComment = (comment) => {
   return connection("comments")
-    .insert(commentObj)
+    .insert(comment)
     .returning("*")
     .then(([response]) => {
       return response;

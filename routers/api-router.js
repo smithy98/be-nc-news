@@ -5,6 +5,9 @@ const {
   articleRouter,
   commentRouter,
 } = require("./index");
+const { getEndpoints } = require("../models/endpoints");
+
+apiRouter.route("/").get(getEndpoints);
 
 apiRouter.use("/topics", topicRouter);
 

@@ -10,7 +10,11 @@
     "test": "mocha spec/app.spec.js",
     "migrate-make": "knex migrate:make",
     "migrate-latest": "knex migrate:latest",
-    "migrate-rollback": "knex migrate:rollback"
+    "migrate-rollback": "knex migrate:rollback",
+    "seed:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex seed:run",
+    "migrate-latest:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest",
+    "migrate-rollback:prod": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback",
+    "start": "node listen.js"
   },
   "repository": {
     "type": "git",
@@ -26,7 +30,7 @@
   "dependencies": {
     "chai-sorted": "^0.2.0",
     "express": "^4.17.1",
-    "knex": "^0.20.14",
+    "knex": "^0.20.15",
     "pg": "^8.0.2",
     "supertest": "^4.0.2"
   },

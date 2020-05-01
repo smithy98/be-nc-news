@@ -5,6 +5,7 @@ const testData = require("./test-data");
 const data = {
   development: devData,
   test: testData,
+  production: devData,
 };
 
 // console.log(JSON.stringify(data[ENV].articleData, null, 2));
