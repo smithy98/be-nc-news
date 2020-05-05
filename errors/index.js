@@ -1,5 +1,11 @@
 exports.handle405s = (req, res) => {
-  res.status(405).send({ msg: "Method Not Allowed" });
+  const err405 = { status: 405, msg: "Method Not Allowed" };
+  res.status(405).send(err405);
+};
+
+exports.handle404s = (req, res) => {
+  const err404 = { status: 404, msg: "Path Not Found" };
+  res.status(404).send(err404);
 };
 
 exports.handlePSQLError = (err, req, res, next) => {
@@ -15,11 +21,6 @@ exports.handlePSQLError = (err, req, res, next) => {
   } else {
     next(err);
   }
-};
-
-exports.handle404s = (err, req, res, next) => {
-  const err404 = { status: 404, msg: "Path Not Found" };
-  res.status(400).send(err400);
 };
 
 exports.handle400s = (err, req, res, next) => {

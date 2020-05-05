@@ -304,7 +304,7 @@ describe("app endpoints", () => {
           expect(response.body).to.eql({});
         });
     });
-    it("Delete: 204 - checks the comment has been deleted", () => {
+    it("DELETE: 204 - checks the comment has been deleted", () => {
       return request(app)
         .delete("/api/comments/1")
         .expect(204)
@@ -320,23 +320,31 @@ describe("app endpoints", () => {
   });
   describe("/api", () => {
     it("Get: 200 - returns an object of endpoints", () => {
-      return (
-        request(app)
-          .get("/api")
-          // .expect(200)
-          .then((response) => {
-            const x = JSON.parse(response.text);
-            expect(Object.keys(x)).to.eql([
-              "GET /api",
-              "GET /api/topics",
-              "GET /api/articles",
-              "GET /api/users/:username",
-              "Get /api/article/:article_id",
-              "PATCH /api/article/:article_id",
-              "GET /api/:article_id/comments",
-            ]);
-          })
-      );
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then((response) => {
+          const x = JSON.parse(response.text);
+          expect(Object.keys(x)).to.eql([
+            "GET /api",
+            "GET /api/topics",
+            "GET /api/articles",
+            "GET /api/users/:username",
+            "Get /api/article/:article_id",
+            "PATCH /api/article/:article_id",
+            "GET /api/:article_id/comments",
+          ]);
+        });
+    });
+  });
+  describe("non existent paths", () => {
+    it("GET: 404 - /api/{non existent path} returns a correct error ", () => {
+      return request(app)
+        .get("/api/tommy")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.be.equal("Path Not Found");
+        });
     });
   });
 });
