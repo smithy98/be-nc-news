@@ -17,6 +17,11 @@ exports.handlePSQLError = (err, req, res, next) => {
   }
 };
 
+exports.handle404s = (err, req, res, next) => {
+  const err404 = { status: 404, msg: "Path Not Found" };
+  res.status(400).send(err400);
+};
+
 exports.handle400s = (err, req, res, next) => {
   const err400 = { status: 400, msg: "Invalid Request" };
   res.status(400).send(err400);

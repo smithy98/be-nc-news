@@ -5,7 +5,7 @@ const {
   getAllArticles,
 } = require("../controllers/article");
 const { postComment, getComments } = require("../controllers/comment");
-const { handle405s } = require("../errors");
+const { handle405s, handle404s } = require("../errors");
 
 articleRouter.route("/").get(getAllArticles).all(handle405s);
 
@@ -20,5 +20,7 @@ articleRouter
   .get(getComments)
   .post(postComment)
   .all(handle405s);
+
+articleRouter.use(handle404s);
 
 module.exports = articleRouter;
