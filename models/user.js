@@ -8,7 +8,7 @@ const fetchAllUsers = () => {
     });
 };
 
-const fetchUserById = (username) => {
+const fetchUserByUsername = (username) => {
   return connection
     .select("*")
     .where("username", username)
@@ -19,6 +19,6 @@ const fetchUserById = (username) => {
 };
 
 module.exports = {
-  fetchUserById,
+  fetchUserByUsername,
   fetchAllUsers,
 };

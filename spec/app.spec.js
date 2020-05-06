@@ -209,6 +209,14 @@ describe("app endpoints", () => {
       });
       return Promise.all(requests);
     });
+    it("GET: 400 - returns an error with Invalid Request Msg when article_id is invalid", () => {
+      return request(app)
+        .get("/api/articles/34567")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid Request");
+        });
+    });
   });
   describe("/api/articles/:article_id/comments", () => {
     it("Post: 201 - add a comment to a article id", () => {

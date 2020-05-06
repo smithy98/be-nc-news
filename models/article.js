@@ -32,6 +32,7 @@ exports.fetchArticleById = ({ article_id }) => {
     .groupBy("articles.article_id")
     .where("articles.article_id", article_id)
     .then(([article]) => {
+      if (Object.keys(article).length === 0) Promise.reject();
       return article;
     });
 };
