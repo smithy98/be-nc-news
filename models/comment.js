@@ -1,6 +1,11 @@
 const connection = require("../db/connection");
+const { fetchArticleById } = require("./article");
 
 exports.addComment = (comment) => {
+  const { article_id } = comment;
+
+  console.log(article_id);
+
   return connection("comments")
     .insert(comment)
     .returning("*")

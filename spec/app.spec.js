@@ -6,6 +6,8 @@ const connection = require("../db/connection");
 
 chai.use(require("chai-sorted"));
 
+process.env.NODE_ENV = "test";
+
 beforeEach(() => {
   return connection.seed.run();
 });
@@ -13,18 +15,24 @@ after(() => connection.destroy());
 
 describe("app endpoints", () => {
   describe("/api/topics", () => {
-    it("Get: 200 - fetches all topics", () => {
+    it("GET: 200 - fetches all topics", () => {
       return request(app)
         .get("/api/topics")
         .expect(200)
         .then(({ body }) => {
           expect(body).to.eql({
             topics: [
-              { slug: "coding", description: "Code is love, code is life" },
-              { slug: "football", description: "FOOTIE!" },
               {
-                slug: "cooking",
-                description: "Hey good looking, what you got cooking?",
+                description: "The man, the Mitch, the legend",
+                slug: "mitch",
+              },
+              {
+                description: "Not dogs",
+                slug: "cats",
+              },
+              {
+                description: "what books are made of",
+                slug: "paper",
               },
             ],
           });
@@ -47,27 +55,27 @@ describe("app endpoints", () => {
   describe("/api/users/:username", () => {
     it("GET: 200 - returns a comment object with correct keys", () => {
       return request(app)
-        .get("/api/users/grumpy19")
+        .get("/api/users/butter_bridge")
         .expect(200)
         .then(({ body }) => {
           expect(body).to.have.keys(["user"]);
           expect(body.user).to.have.keys(["username", "avatar_url", "name"]);
           expect(body).to.be.eql({
             user: {
-              username: "grumpy19",
+              username: "butter_bridge",
+              name: "jonny",
               avatar_url:
-                "https://www.tumbit.com/profile-image/4/original/mr-grumpy.jpg",
-              name: "Paul Grump",
+                "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
             },
           });
         });
     });
-    it("GET: 400 - returns with Invalid Request when invalid ", () => {
+    it("GET: 404 - returns with Path Not Found when invalid ", () => {
       return request(app)
         .get("/api/users/billyroj")
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Invalid Request");
+          expect(body.msg).to.equal("Path Not Found");
         });
     });
     it("INVALID: 405 - returns with Method not allowed", () => {
@@ -85,7 +93,7 @@ describe("app endpoints", () => {
     });
   });
   describe("/api/articles", () => {
-    it("Get: 200 - returns object with an array of article objects", () => {
+    it("GET: 200 - returns object with an array of article objects", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
@@ -105,95 +113,116 @@ describe("app endpoints", () => {
           ]);
         });
     });
-    it("Get: 200 -  returns with correct default sort_by (date)", () => {
+    it("GET: 200 -  returns with correct default sort_by (date)", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
         .then(({ body }) => {
-          expect(body.articles).to.be.sortedBy("created_at");
+          expect(body.articles).to.be.descendingBy("created_at");
         });
     });
-    it("GET: 200 - returns with correct sort_by and order_by params", () => {
+    it("GET: 200 - returns with correct sort_by and order params", () => {
       return request(app)
-        .get("/api/articles?sort_by=article_id&order_by=desc")
+        .get("/api/articles?sort_by=article_id&order=asc")
         .expect(200)
         .then(({ body }) => {
-          expect(body.articles).to.be.descendingBy("article_id");
+          expect(body.articles).to.be.ascendingBy("article_id");
+        });
+    });
+    it("GET: 200 - return with filter array with sort by author", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.descendingBy("author");
         });
     });
     it("GET: 200 - returns with filtered array from topic query", () => {
       return request(app)
-        .get("/api/articles?topic=cooking")
+        .get("/api/articles?topic=cats")
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
           articles.forEach((article) => {
-            expect(article.topic).to.equal("cooking");
+            expect(article.topic).to.equal("cats");
           });
         });
     });
-    it("GET: 400 - returns with Invalid Request when topic query invalid", () => {
+    it("GET: 404 - returns with Path Not Found when topic query invalid", () => {
       return request(app)
-        .get("/api/articles?topic=darts")
-        .expect(400)
+        .get("/api/articles?topic=not-a-topic")
+        .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.be.equal("Invalid Request");
+          expect(body.msg).to.be.equal("Path Not Found");
+        });
+    });
+    it("GET: 200 - returns with empty array from topic who has no articles", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          articles.forEach((article) => {
+            expect(article).to.eql({});
+          });
         });
     });
     it("GET: 200 - returns with filtered array from author query", () => {
       return request(app)
-        .get("/api/articles?author=jessjelly")
+        .get("/api/articles?author=rogersop")
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
           articles.forEach((article) => {
-            expect(article.author).to.equal("jessjelly");
+            expect(article.author).to.equal("rogersop");
           });
         });
     });
-    it("GET: 400 - returns with Invalid Request when author query invalid", () => {
+    it("GET: 200 - returns with empty array from author who has no articles", () => {
       return request(app)
-        .get("/api/articles?author=jkrowling")
-        .expect(400)
+        .get("/api/articles?author=lurker")
+        .expect(200)
         .then(({ body }) => {
-          expect(body.msg).to.be.equal("Invalid Request");
+          const { articles } = body;
+          articles.forEach((article) => {
+            expect(article).to.eql({});
+          });
         });
     });
-    it("GET: 400 - returns with Invalid Request when an invalid query is passed", () => {
+    it("GET: 404 - returns with Path Not Found when author query invalid", () => {
       return request(app)
-        .get("/api/articles?glass=darts")
-        .expect(400)
+        .get("/api/articles?author=not-an-author")
+        .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.be.equal("Invalid Request");
+          expect(body.msg).to.be.equal("Path Not Found");
         });
     });
   });
   describe("/api/articles/:article_id", () => {
-    it("Get: 200 - returns an article object", () => {
+    it("GET: 200 - returns an article object", () => {
       return request(app)
         .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
           expect(body.article).to.eql({
             article_id: 1,
-            title: "Running a Node App",
-            body:
-              "This is part two of a series on how to get up and running with Systemd and Node.js. This part dives deeper into how to successfully run your app with systemd long-term, and how to set it up in a production environment.",
-            votes: 0,
-            topic: "coding",
-            author: "jessjelly",
-            created_at: "2016-08-18T12:07:52.389Z",
-            comment_count: "8",
+            title: "Living in the shadow of a great man",
+            body: "I find this existence challenging",
+            votes: 100,
+            topic: "mitch",
+            author: "butter_bridge",
+            created_at: "2018-11-15T12:21:54.171Z",
+            comment_count: "13",
           });
         });
     });
-    it("Patch: 200 - modifies the data base and returns object", () => {
+    it("PATCH: 200 - modifies the data base and returns object", () => {
       return request(app)
         .patch("/api/articles/1")
         .send({ inc_votes: 1 })
         .expect(200)
         .then(({ body }) => {
-          expect(body.article.votes).to.equal(1);
+          expect(body.article.votes).to.equal(101);
         });
     });
     it("INVALID: 405 - returns with Method not allowed", () => {
@@ -209,32 +238,63 @@ describe("app endpoints", () => {
       });
       return Promise.all(requests);
     });
-    it("GET: 400 - returns an error with Invalid Request Msg when article_id is invalid", () => {
+    it("GET: 404 - returns an error with Path Not Found Msg when article_id is invalid", () => {
       return request(app)
         .get("/api/articles/34567")
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Invalid Request");
+          expect(body.msg).to.equal("Path Not Found");
+        });
+    });
+    it("GET: 404 - returns an error with Path Not Found when string is passed for id", () => {
+      return request(app)
+        .get("/api/articles/dog")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Path Not Found");
         });
     });
   });
-  describe("/api/articles/:article_id/comments", () => {
-    it("Post: 201 - add a comment to a article id", () => {
+  describe.only("/api/articles/:article_id/comments", () => {
+    it("POST: 201 - add a comment to a article id", () => {
       return request(app)
         .post("/api/articles/1/comments")
         .send({
-          username: "tickle122",
+          username: "rogersop",
           body: "its good",
         })
         .expect(201)
         .then(({ body }) => {
           expect(body.comment.article_id).to.equal(1);
-          expect(body.comment.author).to.equal("tickle122");
+          expect(body.comment.author).to.equal("rogersop");
           expect(body.comment.body).to.equal("its good");
-          expect(body.comment.comment_id).to.equal(301);
+          expect(body.comment.comment_id).to.equal(19);
         });
     });
-    it("Get: 200 - returns an array of comment objects", () => {
+    it("POST: 404 - error when article_id is invalid", () => {
+      return request(app)
+        .post("/api/articles/1000/comments")
+        .send({
+          username: "tickle122",
+          body: "its good",
+        })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Path Not Found");
+        });
+    });
+    it("POST: 400 - error when username is invalid", () => {
+      return request(app)
+        .post("/api/articles/1000/comments")
+        .send({
+          username: "tickle122",
+        })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid Request");
+        });
+    });
+    it("GET: 200 - returns an array of comment objects", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
@@ -246,7 +306,15 @@ describe("app endpoints", () => {
           }
         });
     });
-    it("Get: 200 - returns an array of comment objects sorted by default(created_at)", () => {
+    it("GET: 404 - returns an error when invalid article id", () => {
+      return request(app)
+        .get("/api/articles/1000/comments")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Path Not Found");
+        });
+    });
+    it("GET: 200 - returns an array of comment objects sorted by default(created_at)", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
@@ -262,7 +330,7 @@ describe("app endpoints", () => {
           expect(newDateBody).to.be.sortedBy("created_at", "asc");
         });
     });
-    it("Get: 200 - returns an array of comment objects sorted by comment_id", () => {
+    it("GET: 200 - returns an array of comment objects sorted by comment_id", () => {
       return request(app)
         .get("/api/articles/1/comments?sort_by=comment_id")
         .expect(200)
@@ -270,9 +338,9 @@ describe("app endpoints", () => {
           expect(body.comments).to.be.sortedBy("comment_id", "asc");
         });
     });
-    it("Get: 200 - returns an array of comment objects sorted by comment_id in descending order ", () => {
+    it("GET: 200 - returns an array of comment objects sorted by comment_id in descending order ", () => {
       return request(app)
-        .get("/api/articles/1/comments?sort_by=comment_id&order_by")
+        .get("/api/articles/1/comments?sort_by=comment_id&order")
         .expect(200)
         .then(({ body }) => {
           expect(body.comments).to.be.sortedBy("comment_id", "asc");
@@ -301,7 +369,29 @@ describe("app endpoints", () => {
         })
         .expect(200)
         .then(({ body: { comment } }) => {
-          expect(comment.votes).to.equal(3);
+          expect(comment.votes).to.equal(20);
+        });
+    });
+    it("PATCH: 404 - returns the comment object", () => {
+      return request(app)
+        .patch("/api/comments/1000")
+        .send({
+          inc_votes: 4,
+        })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Path Not Found");
+        });
+    });
+    it("PATCH: 404 - returns the comment object", () => {
+      return request(app)
+        .patch("/api/comments/not-a-valid-id")
+        .send({
+          inc_votes: 4,
+        })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Path Not Found");
         });
     });
     it("DELETE: 204 - returns a 204 status code", () => {
@@ -325,9 +415,17 @@ describe("app endpoints", () => {
             });
         });
     });
+    it("DELETE: 404 - returns error when comment_id does not exist", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Path Not Found");
+        });
+    });
   });
   describe("/api", () => {
-    it("Get: 200 - returns an object of endpoints", () => {
+    it("GET: 200 - returns an object of endpoints", () => {
       return request(app)
         .get("/api")
         .expect(200)

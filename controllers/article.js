@@ -7,8 +7,7 @@ const {
 exports.getAllArticles = (req, res, next) => {
   fetchAllArticles(req.query)
     .then((articles) => {
-      if (articles[0]) res.status(200).send({ articles });
-      else next(res);
+      res.status(200).send({ articles });
     })
     .catch(next);
 };
@@ -18,7 +17,9 @@ exports.getArticleById = (req, res, next) => {
     .then((article) => {
       res.status(200).send({ article });
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 exports.patchArticleById = (req, res, next) => {

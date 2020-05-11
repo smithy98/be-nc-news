@@ -1,6 +1,6 @@
 const connection = require("../db/connection");
 
-const fetchAllUsers = () => {
+exports.fetchAllUsers = () => {
   return connection("users")
     .select("*")
     .then((users) => {
@@ -8,17 +8,22 @@ const fetchAllUsers = () => {
     });
 };
 
-const fetchUserByUsername = (username) => {
-  return connection
+exports.fetchUserByUsername = (username) => {
+  return connection("users")
     .select("*")
     .where("username", username)
-    .from("users")
     .then(([user]) => {
       return user;
     });
 };
 
-module.exports = {
-  fetchUserByUsername,
-  fetchAllUsers,
+exports.checkUsername = (username) => {
+  if (!username) return null;
+  return connection("users")
+    .select("*")
+    .where("username", username)
+    .then(([user]) => {
+      if (user) return true;
+      return false;
+    });
 };

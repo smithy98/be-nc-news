@@ -1,14 +1,20 @@
 const connection = require("../db/connection");
 
-const fetchAllTopics = () => {
-  return connection
+exports.fetchAllTopics = () => {
+  return connection("topics")
     .select("*")
-    .from("topics")
     .then((topics) => {
       return topics;
     });
 };
 
-module.exports = {
-  fetchAllTopics,
+exports.checkTopic = (slug) => {
+  if (!slug) return null;
+  return connection("topics")
+    .select("*")
+    .where("slug", slug)
+    .then(([topic]) => {
+      if (topic) return true;
+      return false;
+    });
 };

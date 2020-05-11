@@ -1,11 +1,8 @@
 exports.handle405s = (req, res) => {
+  // console.log(req.next);
+  // console.log(Object.keys(req));
   const err405 = { status: 405, msg: "Method Not Allowed" };
   res.status(405).send(err405);
-};
-
-exports.handle404s = (req, res) => {
-  const err404 = { status: 404, msg: "Path Not Found" };
-  res.status(404).send(err404);
 };
 
 exports.handlePSQLError = (err, req, res, next) => {
@@ -21,6 +18,14 @@ exports.handlePSQLError = (err, req, res, next) => {
   } else {
     next(err);
   }
+};
+
+// handleCustom - using the error passed into next for a reusable func
+
+exports.handle404s = (err, req, res, next) => {
+  // add conditional logic
+  const err404 = { status: 404, msg: "Path Not Found" };
+  res.status(404).send(err404);
 };
 
 exports.handle400s = (err, req, res, next) => {

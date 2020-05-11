@@ -18,6 +18,4 @@ apiRouter.use("/articles", articleRouter);
 
 apiRouter.use("/comments", commentRouter);
 
-apiRouter.use(handle404s);
-
 module.exports = apiRouter;
