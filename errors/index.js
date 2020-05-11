@@ -24,6 +24,7 @@ exports.handlePSQLError = (err, req, res, next) => {
 
 exports.handle404s = (err, req, res, next) => {
   // add conditional logic
+  // console.log(err);
   const err404 = { status: 404, msg: "Path Not Found" };
   res.status(404).send(err404);
 };

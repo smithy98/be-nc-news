@@ -255,7 +255,7 @@ describe("app endpoints", () => {
         });
     });
   });
-  describe.only("/api/articles/:article_id/comments", () => {
+  describe("/api/articles/:article_id/comments", () => {
     it("POST: 201 - add a comment to a article id", () => {
       return request(app)
         .post("/api/articles/1/comments")
@@ -283,15 +283,16 @@ describe("app endpoints", () => {
           expect(body.msg).to.equal("Path Not Found");
         });
     });
-    it("POST: 400 - error when username is invalid", () => {
+    it("POST: 404 - error when article_id is invalid", () => {
       return request(app)
-        .post("/api/articles/1000/comments")
+        .post("/api/articles/not-a-valid-id/comments")
         .send({
           username: "tickle122",
+          body: "jjjj",
         })
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Invalid Request");
+          expect(body.msg).to.equal("Path Not Found");
         });
     });
     it("GET: 200 - returns an array of comment objects", () => {
@@ -417,7 +418,7 @@ describe("app endpoints", () => {
     });
     it("DELETE: 404 - returns error when comment_id does not exist", () => {
       return request(app)
-        .delete("/api/comments/1")
+        .delete("/api/comments/100000")
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).to.equal("Path Not Found");

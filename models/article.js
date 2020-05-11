@@ -70,3 +70,17 @@ exports.modifyArticleById = (article_id, inc_votes) => {
       return article;
     });
 };
+
+exports.checkArticle = (article_id) => {
+  if (isNaN(article_id)) return false;
+  return connection("articles")
+    .select("articles.*")
+    .count("comments.article_id as comment_count")
+    .leftJoin("comments", "articles.article_id", "comments.article_id")
+    .groupBy("articles.article_id")
+    .where("articles.article_id", article_id)
+    .then(([article]) => {
+      if (Object.keys(article).length === 0) return false;
+      return true;
+    });
+};
