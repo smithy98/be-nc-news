@@ -72,7 +72,7 @@ describe("app endpoints", () => {
     });
     it("GET: 404 - returns with Path Not Found when invalid ", () => {
       return request(app)
-        .get("/api/users/billyroj")
+        .get("/api/users/not-a-username")
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).to.equal("Path Not Found");
@@ -424,6 +424,14 @@ describe("app endpoints", () => {
           expect(body.msg).to.equal("Path Not Found");
         });
     });
+    it("DELETE: 404 - returns error when comment_id is invalid", () => {
+      return request(app)
+        .delete("/api/comments/not-a-number")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Path Not Found");
+        });
+    });
   });
   describe("/api", () => {
     it("GET: 200 - returns an object of endpoints", () => {
@@ -443,11 +451,24 @@ describe("app endpoints", () => {
           ]);
         });
     });
+    it("INVALID: 405 - returns with Method not allowed", () => {
+      const invalidMethods = ["put", "delete", "patch"];
+
+      const requests = invalidMethods.map((method) => {
+        return request(app)
+          [method]("/api")
+          .expect(405)
+          .then((res) => {
+            expect(res.body.msg).to.eql("Method Not Allowed");
+          });
+      });
+      return Promise.all(requests);
+    });
   });
   describe("non existent paths", () => {
     it("GET: 404 - /api/{non existent path} returns a correct error ", () => {
       return request(app)
-        .get("/api/tommy")
+        .get("/api/non-existent-paths")
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).to.be.equal("Path Not Found");

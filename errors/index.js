@@ -1,6 +1,4 @@
 exports.handle405s = (req, res) => {
-  // console.log(req.next);
-  // console.log(Object.keys(req));
   const err405 = { status: 405, msg: "Method Not Allowed" };
   res.status(405).send(err405);
 };
