@@ -17,14 +17,14 @@ exports.addComment = (comment) => {
 
 exports.fetchCommentsById = (
   { article_id },
-  { sort_by = "created_at", order_by = "asc" }
+  { sort_by = "created_at", order = "desc" }
 ) => {
   return checkArticle(article_id).then((response) => {
     if (!response) Promise.reject();
     return connection("comments")
       .select("*")
       .where("article_id", article_id)
-      .orderBy(sort_by, order_by)
+      .orderBy(sort_by, order)
       .then((comments) => {
         return comments;
       });

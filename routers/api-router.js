@@ -6,7 +6,7 @@ const {
   commentRouter,
 } = require("./index");
 const { getEndpoints } = require("../models/endpoints");
-const { handle405s, handle404s } = require("../errors");
+const { handle405s } = require("../errors");
 
 apiRouter.route("/").get(getEndpoints).all(handle405s);
 

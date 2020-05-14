@@ -5,6 +5,7 @@ const {
   formatDates,
   makeRefObj,
   formatComments,
+  trimUrl,
 } = require("../db/utils/utils");
 
 const connection = require("../db/connection");
@@ -83,7 +84,7 @@ describe("formatDates", () => {
   });
 });
 
-describe.only("makeRefObj", () => {
+describe("makeRefObj", () => {
   it("returns an object", () => {
     const refObj = makeRefObj([{ article_id: 1, title: "A" }]);
     expect(refObj).to.be.an("object");
@@ -143,7 +144,7 @@ describe.only("makeRefObj", () => {
   });
 });
 
-describe.only("formatComments", () => {
+describe("formatComments", () => {
   it("returns an empty array when passed an empty array", () => {
     const commentFormatted = formatComments([]);
     expect(commentFormatted).to.eql([]);
@@ -180,5 +181,18 @@ describe.only("formatComments", () => {
       { roger: 1 }
     );
     expect(commentFormatted[0].created_at).to.be.instanceOf(Date);
+  });
+});
+
+describe.only("trimUrl", () => {
+  it("returns a string if it is a string", () => {
+    expect(trimUrl("/url")).to.be.a("string");
+  });
+  it("returns a number if it is a number", () => {
+    expect(trimUrl("/4")).to.be.a("number");
+  });
+  it("removes / and passes rest", () => {
+    expect(trimUrl("/4")).to.equal(4);
+    expect(trimUrl("/something")).to.equal("something");
   });
 });

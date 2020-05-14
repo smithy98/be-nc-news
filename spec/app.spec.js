@@ -70,12 +70,12 @@ describe("app endpoints", () => {
           });
         });
     });
-    it("GET: 404 - returns with Path Not Found when invalid ", () => {
+    it.only("GET: 400 - returns with Invalid Request when passed invalid username", () => {
       return request(app)
         .get("/api/users/not-a-username")
-        .expect(404)
+        .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Invalid Request");
         });
     });
     it("INVALID: 405 - returns with Method not allowed", () => {
@@ -225,6 +225,24 @@ describe("app endpoints", () => {
           expect(body.article.votes).to.equal(101);
         });
     });
+    it("PATCH: 400 - returns invalid request when no body is passed", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send()
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid Body");
+        });
+    });
+    // it("PATCH: 400 - returns Invalid Request when the username in the body is invalid", () => {
+    //   return request(app)
+    //     .patch("/api/articles/1")
+    //     .send()
+    //     .expect(400)
+    //     .then(({ body }) => {
+    //       expect(body.msg).to.equal("Invalid Request");
+    //     });
+    // }) // PATCH `/api/articles/1` - invalid username
     it("INVALID: 405 - returns with Method not allowed", () => {
       const invalidMethods = ["put", "delete", "post"];
 
@@ -283,16 +301,27 @@ describe("app endpoints", () => {
           expect(body.msg).to.equal("Path Not Found");
         });
     });
-    it("POST: 404 - error when article_id is invalid", () => {
+    it("POST: 400 - Invalid Request error when all keys are not present", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          body: "its good",
+        })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid Request");
+        });
+    });
+    it("POST: 400 - Invalid Request error when article_id is invalid", () => {
       return request(app)
         .post("/api/articles/not-a-valid-id/comments")
         .send({
           username: "tickle122",
           body: "jjjj",
         })
-        .expect(404)
+        .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Invalid Request");
         });
     });
     it("GET: 200 - returns an array of comment objects", () => {
@@ -305,14 +334,23 @@ describe("app endpoints", () => {
             expect(comment).to.be.an("object");
             expect(comment.article_id).to.equal(1);
           }
+          expect(comments).to.descendingBy("created_at");
         });
     });
-    it("GET: 404 - returns an error when invalid article id", () => {
+    it("GET: 404 - returns an error when the article id does not exist", () => {
       return request(app)
         .get("/api/articles/1000/comments")
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).to.equal("Path Not Found");
+        });
+    });
+    it("GET: 400 - returns an Invalid Request error when invalid article id is passed", () => {
+      return request(app)
+        .get("/api/articles/not-a-valid-id/comments")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid Request");
         });
     });
     it("GET: 200 - returns an array of comment objects sorted by default(created_at)", () => {
@@ -336,15 +374,15 @@ describe("app endpoints", () => {
         .get("/api/articles/1/comments?sort_by=comment_id")
         .expect(200)
         .then(({ body }) => {
-          expect(body.comments).to.be.sortedBy("comment_id", "asc");
+          expect(body.comments).to.be.descendingBy("comment_id");
         });
     });
-    it("GET: 200 - returns an array of comment objects sorted by comment_id in descending order ", () => {
+    it("GET: 200 - returns an array of comment objects sorted by comment_id in ascending order ", () => {
       return request(app)
-        .get("/api/articles/1/comments?sort_by=comment_id&order")
+        .get("/api/articles/1/comments?sort_by=comment_id&order=asc")
         .expect(200)
         .then(({ body }) => {
-          expect(body.comments).to.be.sortedBy("comment_id", "asc");
+          expect(body.comments).to.be.ascendingBy("comment_id");
         });
     });
     it("INVALID: 405 - returns with Method not allowed", () => {
@@ -373,7 +411,7 @@ describe("app endpoints", () => {
           expect(comment.votes).to.equal(20);
         });
     });
-    it("PATCH: 404 - returns the comment object", () => {
+    it("PATCH: 404 - returns error Path Not Found when id does not exist", () => {
       return request(app)
         .patch("/api/comments/1000")
         .send({
@@ -384,15 +422,43 @@ describe("app endpoints", () => {
           expect(body.msg).to.equal("Path Not Found");
         });
     });
-    it("PATCH: 404 - returns the comment object", () => {
+    it("PATCH: 400 - returns error Invalid Request when invalid id is passed", () => {
       return request(app)
         .patch("/api/comments/not-a-valid-id")
         .send({
           inc_votes: 4,
         })
-        .expect(404)
+        .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Invalid Request");
+        });
+    });
+    it("PATCH: 400 - returns Invalid Request when body contains invalid inc_votes", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(400)
+        .then(({ body: { comment } }) => {
+          expect(comment).to.eql({
+            comment_id: 1,
+            body:
+              "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            belongs_to: "They're not exactly dogs, are they?",
+            created_by: "butter_bridge",
+            votes: 16,
+            created_at: 1511354163389,
+          });
+        });
+    });
+    it("PATCH: 200 - returns unchanged comment obj when no inc_votes is passed", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({
+          inc_votes: "invalid_vote",
+        })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Invalid Request");
         });
     });
     it("DELETE: 204 - returns a 204 status code", () => {
@@ -424,12 +490,12 @@ describe("app endpoints", () => {
           expect(body.msg).to.equal("Path Not Found");
         });
     });
-    it("DELETE: 404 - returns error when comment_id is invalid", () => {
+    it("DELETE: 400 - returns error Invalid Request when comment_id is invalid", () => {
       return request(app)
         .delete("/api/comments/not-a-number")
-        .expect(404)
+        .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Invalid Request");
         });
     });
   });

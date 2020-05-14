@@ -28,3 +28,11 @@ exports.formatComments = (comments, articleRef) => {
     };
   });
 };
+
+exports.trimUrl = (url) => {
+  const trimmedUrl = url.slice(1);
+  if (parseInt(trimmedUrl)) {
+    return parseInt(trimmedUrl);
+  }
+  return trimmedUrl;
+};

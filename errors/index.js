@@ -1,3 +1,5 @@
+const { trimUrl } = require("../db/utils/utils");
+
 exports.handle405s = (req, res) => {
   const err405 = { status: 405, msg: "Method Not Allowed" };
   res.status(405).send(err405);
@@ -6,6 +8,7 @@ exports.handle405s = (req, res) => {
 exports.handlePSQLError = (err, req, res, next) => {
   const errCodes = {
     42703: { status: 400, msg: "Column Not Found" },
+    "22P02": { status: 400, msg: "Invalid Body" },
   };
 
   if (err.code) {
@@ -21,8 +24,6 @@ exports.handlePSQLError = (err, req, res, next) => {
 // handleCustom - using the error passed into next for a reusable func
 
 exports.handle404s = (err, req, res, next) => {
-  // add conditional logic
-  // console.log(err);
   const err404 = { status: 404, msg: "Path Not Found" };
   res.status(404).send(err404);
 };

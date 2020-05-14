@@ -6,6 +6,4 @@ userRouter.route("/").get(getAllUsers).all(handle405s);
 
 userRouter.route("/:username").get(getUserByUsername).all(handle405s);
 
-userRouter.use(handle404s);
-
 module.exports = userRouter;
