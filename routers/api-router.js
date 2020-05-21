@@ -18,8 +18,8 @@ apiRouter.use("/articles", articleRouter);
 
 apiRouter.use("/comments", commentRouter);
 
-apiRouter.use("/:end", (err) => {
-  next(err);
+apiRouter.use("/:end", (req, res, next) => {
+  next({ status: 404, msg: "Path Not Found" });
 });
 
 module.exports = apiRouter;

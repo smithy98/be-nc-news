@@ -27,20 +27,18 @@ exports.fetchAllArticles = ({
           checkTopic(topic),
         ]);
       } else {
-        return [articles];
+        return Promise.all([articles]);
       }
     })
     .then((arrayOfResponses) => {
-      if (arrayOfResponses[1] === false || arrayOfResponses[2] === false) {
-        Promise.reject(err);
-      } else {
-        return arrayOfResponses[0];
-      }
+      return arrayOfResponses[0];
     });
 };
 
 exports.fetchArticleById = ({ article_id }) => {
-  if (isNaN(article_id)) return false;
+  if (isNaN(article_id)) {
+    return Promise.reject({ status: 400, msg: "Invalid Request" });
+  }
   return connection("articles")
     .select("articles.*")
     .count("comments.article_id as comment_count")
@@ -48,8 +46,8 @@ exports.fetchArticleById = ({ article_id }) => {
     .groupBy("articles.article_id")
     .where("articles.article_id", article_id)
     .then(([article]) => {
-      if (Object.keys(article).length === 0) Promise.reject();
-      return article;
+      if (article) return article;
+      return Promise.reject({ status: 404, msg: "Article Not Found" });
     });
 };
 
@@ -72,7 +70,8 @@ exports.modifyArticleById = (article_id, inc_votes) => {
 };
 
 exports.checkArticle = (article_id) => {
-  if (isNaN(article_id)) return false;
+  if (isNaN(article_id))
+    return Promise.reject({ status: 400, msg: "Invalid Request" });
   return connection("articles")
     .select("articles.*")
     .count("comments.article_id as comment_count")
@@ -80,7 +79,7 @@ exports.checkArticle = (article_id) => {
     .groupBy("articles.article_id")
     .where("articles.article_id", article_id)
     .then(([article]) => {
-      if (Object.keys(article).length === 0) return false;
-      return true;
+      if (article) return true;
+      return Promise.reject({ status: 404, msg: "Article Not Found" });
     });
 };

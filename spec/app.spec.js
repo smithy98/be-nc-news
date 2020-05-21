@@ -70,12 +70,12 @@ describe("app endpoints", () => {
           });
         });
     });
-    it.only("GET: 400 - returns with Invalid Request when passed invalid username", () => {
+    it("GET: 404 - returns with Not Found when passed a non existent username", () => {
       return request(app)
         .get("/api/users/not-a-username")
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Invalid Request");
+          expect(body.msg).to.equal("User Not Found");
         });
     });
     it("INVALID: 405 - returns with Method not allowed", () => {
@@ -153,7 +153,7 @@ describe("app endpoints", () => {
         .get("/api/articles?topic=not-a-topic")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.be.equal("Path Not Found");
+          expect(body.msg).to.be.equal("Topic Not Found");
         });
     });
     it("GET: 200 - returns with empty array from topic who has no articles", () => {
@@ -194,7 +194,7 @@ describe("app endpoints", () => {
         .get("/api/articles?author=not-an-author")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.be.equal("Path Not Found");
+          expect(body.msg).to.be.equal("User Not Found");
         });
     });
   });
@@ -256,20 +256,20 @@ describe("app endpoints", () => {
       });
       return Promise.all(requests);
     });
-    it("GET: 404 - returns an error with Path Not Found Msg when article_id is invalid", () => {
+    it("GET: 404 - returns an error with Article Not Found Msg when article_id is non-existent", () => {
       return request(app)
         .get("/api/articles/34567")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Article Not Found");
         });
     });
-    it("GET: 404 - returns an error with Path Not Found when string is passed for id", () => {
+    it("GET: 400 - returns an error with Path Not Found when string is passed for id", () => {
       return request(app)
         .get("/api/articles/dog")
-        .expect(404)
+        .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Invalid Request");
         });
     });
   });
@@ -298,7 +298,7 @@ describe("app endpoints", () => {
         })
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Article Not Found");
         });
     });
     it("POST: 400 - Invalid Request error when all keys are not present", () => {
@@ -342,7 +342,7 @@ describe("app endpoints", () => {
         .get("/api/articles/1000/comments")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Article Not Found");
         });
     });
     it("GET: 400 - returns an Invalid Request error when invalid article id is passed", () => {
@@ -419,7 +419,7 @@ describe("app endpoints", () => {
         })
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Comment Not Found");
         });
     });
     it("PATCH: 400 - returns error Invalid Request when invalid id is passed", () => {
@@ -433,30 +433,30 @@ describe("app endpoints", () => {
           expect(body.msg).to.equal("Invalid Request");
         });
     });
-    it("PATCH: 400 - returns Invalid Request when body contains invalid inc_votes", () => {
+    it("PATCH: 200 - returns Invalid Request when body contains no inc_votes", () => {
       return request(app)
         .patch("/api/comments/1")
         .send({})
-        .expect(400)
+        .expect(200)
         .then(({ body: { comment } }) => {
           expect(comment).to.eql({
             comment_id: 1,
+            author: "butter_bridge",
+            article_id: 9,
+            votes: 16,
+            created_at: "2017-11-22T12:36:03.389Z",
             body:
               "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
-            belongs_to: "They're not exactly dogs, are they?",
-            created_by: "butter_bridge",
-            votes: 16,
-            created_at: 1511354163389,
           });
         });
     });
-    it("PATCH: 200 - returns unchanged comment obj when no inc_votes is passed", () => {
+    it("PATCH: 400 - returns unchanged comment obj when invalid inc_votes is passed", () => {
       return request(app)
         .patch("/api/comments/1")
         .send({
           inc_votes: "invalid_vote",
         })
-        .expect(200)
+        .expect(400)
         .then(({ body }) => {
           expect(body.msg).to.equal("Invalid Request");
         });
@@ -487,7 +487,7 @@ describe("app endpoints", () => {
         .delete("/api/comments/100000")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("Path Not Found");
+          expect(body.msg).to.equal("Comment Not Found");
         });
     });
     it("DELETE: 400 - returns error Invalid Request when comment_id is invalid", () => {
@@ -534,7 +534,7 @@ describe("app endpoints", () => {
   describe("non existent paths", () => {
     it("GET: 404 - /api/{non existent path} returns a correct error ", () => {
       return request(app)
-        .get("/api/non-existent-paths")
+        .get("/api/non-existent-path")
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).to.be.equal("Path Not Found");

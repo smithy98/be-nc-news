@@ -13,17 +13,20 @@ exports.fetchUserByUsername = (username) => {
     .select("*")
     .where("username", username)
     .then(([user]) => {
+      if (!user) return Promise.reject({ status: 404, msg: "User Not Found" });
       return user;
     });
 };
 
+// false if non-existent , true if existent || no user query
+
 exports.checkUsername = (username) => {
-  if (!username) return null;
+  if (!username) return true;
   return connection("users")
     .select("*")
     .where("username", username)
     .then(([user]) => {
       if (user) return true;
-      return false;
+      return Promise.reject({ status: 404, msg: "User Not Found" });
     });
 };

@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const apiRouter = require("./routers/api-router");
-const { handlePSQLError, handle400s, handle404s } = require("./errors");
+const { handlePSQLError, handleCustom } = require("./errors");
 
 app.use(cors());
 
@@ -12,8 +12,6 @@ app.use("/api", apiRouter);
 
 app.use(handlePSQLError); // if doesn't meet this, NEXT
 
-app.use(handle404s);
-
-app.use(handle400s);
+app.use(handleCustom);
 
 module.exports = app;

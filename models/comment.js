@@ -2,10 +2,11 @@ const connection = require("../db/connection");
 const { checkArticle } = require("./article");
 
 exports.addComment = (comment) => {
-  const { article_id } = comment;
+  const { article_id, body, author } = comment;
 
   return checkArticle(article_id).then((response) => {
-    if (!response) Promise.reject();
+    if (!response || !body || !author)
+      return Promise.reject({ status: 400, msg: "Invalid Request" });
     return connection("comments")
       .insert(comment)
       .returning("*")
@@ -32,10 +33,18 @@ exports.fetchCommentsById = (
 };
 
 exports.modifyComment = ({ inc_votes }, { comment_id }) => {
+  if (isNaN(comment_id))
+    return Promise.reject({ status: 400, msg: "Invalid Request" });
+  if (!inc_votes) inc_votes = 0;
+  if (isNaN(inc_votes))
+    return Promise.reject({ status: 400, msg: "Invalid Request" });
+
   return connection("comments")
     .select("votes")
     .where("comment_id", comment_id)
     .then(([comment]) => {
+      if (!comment)
+        return Promise.reject({ status: 404, msg: "Comment Not Found" });
       const { votes } = comment;
       const newVotes = votes + inc_votes;
 
@@ -44,29 +53,26 @@ exports.modifyComment = ({ inc_votes }, { comment_id }) => {
         .update("votes", newVotes)
         .returning("*");
     })
-    .then(([article]) => {
-      return article;
+    .then(([comment]) => {
+      return comment;
     });
 };
 
 const checkComment = (comment_id) => {
-  if (isNaN(comment_id)) return false;
+  if (isNaN(comment_id))
+    return Promise.reject({ status: 400, msg: "Invalid Request" });
   return connection("comments")
     .select("*")
     .where("comment_id", comment_id)
     .then((comments) => {
-      if (Object.keys(comments[0]).length === 0) return false;
+      if (!comments[0])
+        return Promise.reject({ status: 404, msg: "Comment Not Found" });
       return true;
     });
 };
 
 exports.removeComment = ({ comment_id }) => {
   return checkComment(comment_id).then((response) => {
-    if (!response) {
-      console.log("inside");
-      Promise.reject();
-    } else {
-      return connection("comments").where("comment_id", comment_id).delete();
-    }
+    return connection("comments").where("comment_id", comment_id).delete();
   });
 };

@@ -11,8 +11,7 @@ const getAllUsers = (req, res, next) => {
 const getUserByUsername = (req, res, next) => {
   fetchUserByUsername(req.params.username)
     .then((user) => {
-      if (user) res.status(200).send({ user });
-      else next(res);
+      res.status(200).send({ user });
     })
     .catch(next);
 };

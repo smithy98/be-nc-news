@@ -9,12 +9,12 @@ exports.fetchAllTopics = () => {
 };
 
 exports.checkTopic = (slug) => {
-  if (!slug) return null;
+  if (!slug) return true;
   return connection("topics")
     .select("*")
     .where("slug", slug)
     .then(([topic]) => {
       if (topic) return true;
-      return false;
+      return Promise.reject({ status: 404, msg: "Topic Not Found" });
     });
 };
