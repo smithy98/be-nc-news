@@ -10,7 +10,7 @@ app.use(express.json());
 
 app.use("/api", apiRouter);
 
-app.use(handlePSQLError); // if doesn't meet this, NEXT
+app.use(handlePSQLError);
 
 app.use(handleCustom);
 

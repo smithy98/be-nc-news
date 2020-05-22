@@ -18,8 +18,6 @@ exports.fetchUserByUsername = (username) => {
     });
 };
 
-// false if non-existent , true if existent || no user query
-
 exports.checkUsername = (username) => {
   if (!username) return true;
   return connection("users")
